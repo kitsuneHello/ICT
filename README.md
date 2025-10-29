@@ -1,6 +1,7 @@
 # ReadMe
 
 **模擬授業登録コマンド**
+```
 curl -X POST http://18.214.16.68:3000/lecture/create   
  -H "Content-Type: multipart/form-data"
  -F "lecture_name=模擬授業A"
@@ -20,3 +21,4 @@ curl -X POST http://18.214.16.68:3000/lecture/create
  -F "sessions[2][date]=2025-11-02"
  -F "sessions[2][start_time]=10:00" 
  -F "sessions[2][end_time]=11:00"
+```
