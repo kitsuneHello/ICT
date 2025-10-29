@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>講義詳細</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 16px;
+        }
+
+        .header {
+            margin-bottom: 12px;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 700px;
+            border: 1px solid #ccc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>{{LECTURE_NAME}}</h1>
+    </div>
+
+    <div class="outline">
+        <h2>講義概要（PDF）</h2>
+        <embed src="{{PDF_PATH}}" type="application/pdf" class="pdf-viewer" />
+        <p><a href="{{PDF_PATH}}" target="_blank">PDFを新しいタブで開く</a></p>
+    </div>
+
+    <div class="sessions">
+        <h2>実施回情報</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>開始日時</th>
+                    <th>終了日時</th>
+                    <th>場所</th>
+                    <th>定員</th>
+                    <th>申し込み人数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{SESSION_ROWS}}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

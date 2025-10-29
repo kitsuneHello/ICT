@@ -1,0 +1,107 @@
+-- データベースが存在しない場合は作成
+CREATE DATABASE IF NOT EXISTS open_campus_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE open_campus_db;
+
+-- -----------------------------------------------------
+-- 1. 模擬授業 (Mock_Lecture) テーブル
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Mock_Lecture (
+  lecture_id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '模擬授業ID',
+  lecture_name VARCHAR(60) NOT NULL COMMENT '授業名',
+  outline_pdf_path VARCHAR(255) NOT NULL COMMENT '授業概要PDFファイルパス',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時'
+) ENGINE=InnoDB;
+
+
+-- -----------------------------------------------------
+-- 2. 模擬授業担当者 (Lecture_Staff) テーブル
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Lecture_Staff (
+  lecture_staff_id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '模擬授業担当者ID',
+  lecture_id MEDIUMINT UNSIGNED NOT NULL COMMENT '模擬授業ID',
+  staff_name VARCHAR(50) NOT NULL COMMENT '担当職員名',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  FOREIGN KEY (lecture_id) REFERENCES Mock_Lecture(lecture_id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='模擬授業と担当職員を紐付け';
+
+
+-- -----------------------------------------------------
+-- 3. 実施回 (Session) テーブル
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Session (
+  session_id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '実施回ID',
+  lecture_id MEDIUMINT UNSIGNED NOT NULL COMMENT '模擬授業ID',
+  start_datetime DATETIME NOT NULL COMMENT '開始日時',
+  end_datetime DATETIME NOT NULL COMMENT '終了日時',
+  location VARCHAR(100) NOT NULL COMMENT '開講場所',
+  max_capacity TINYINT UNSIGNED NOT NULL COMMENT '最大受入可能人数',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時',
+  FOREIGN KEY (lecture_id) REFERENCES Mock_Lecture(lecture_id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='各模擬授業の具体的な開催情報を管理';
+
+
+-- -----------------------------------------------------
+-- 4. ユーザー (User) テーブル
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS User (
+  user_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'ユーザーID',
+  login_id VARCHAR(50) NOT NULL UNIQUE COMMENT 'ログインID',
+  password_hash VARCHAR(255) NOT NULL COMMENT 'ハッシュ化パスワード',
+  student_name VARCHAR(50) NOT NULL COMMENT '中学生氏名',
+  parent_name VARCHAR(50) NOT NULL COMMENT '保護者氏名',
+  junior_high_school VARCHAR(100) NOT NULL COMMENT '中学校名',
+  student_grade TINYINT UNSIGNED NOT NULL COMMENT '学年',
+  email VARCHAR(100) NOT NULL UNIQUE COMMENT 'メールアドレス',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時'
+) ENGINE=InnoDB COMMENT='ユーザーのアカウント情報を管理';
+
+
+-- -----------------------------------------------------
+-- 5. 申し込み (Application) テーブル
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Application (
+  application_id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '申し込みID',
+  user_id INT UNSIGNED NOT NULL COMMENT 'ユーザーID',
+  session_id MEDIUMINT UNSIGNED NOT NULL COMMENT '実施回ID',
+  applied_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '申し込み日時',
+  lottery_result ENUM('PENDING', 'WIN', 'LOSE') NOT NULL DEFAULT 'PENDING' COMMENT '抽選結果',
+  is_email_sent BOOLEAN NOT NULL DEFAULT FALSE COMMENT '結果メール送信済フラグ',
+  FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE,
+  FOREIGN KEY (session_id) REFERENCES Session(session_id) ON DELETE CASCADE
+) ENGINE=InnoDB COMMENT='ユーザーの申込情報を管理';
+
+
+-- -----------------------------------------------------
+-- 6. 管理者 (Admin_User) テーブル
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Admin_User (
+  admin_id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '管理者ID',
+  login_id VARCHAR(50) NOT NULL UNIQUE COMMENT 'ログインID',
+  password_hash VARCHAR(255) NOT NULL COMMENT 'ハッシュ化パスワード',
+  name VARCHAR(50) NOT NULL COMMENT '氏名',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時'
+) ENGINE=InnoDB COMMENT='システム管理者のアカウント情報を管理';
+
+
+-- -----------------------------------------------------
+-- 7. 受付期間 (Reception_Period) テーブル
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Reception_Period (
+  period_id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '期間ID',
+  start_datetime DATETIME NOT NULL COMMENT '受付開始日時',
+  end_datetime DATETIME NOT NULL COMMENT '受付終了日時',
+  is_active BOOLEAN NOT NULL DEFAULT TRUE COMMENT '有効フラグ',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時'
+) ENGINE=InnoDB COMMENT='全体の事前申し込み受付期間を管理';
+
+
+-- -----------------------------------------------------
+-- 8. 抽選管理 (Lottery_Control) テーブル
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS Lottery_Control (
+  lottery_control_id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT '抽選管理ID',
+  lottery_datetime DATETIME NULL COMMENT '抽選実施日時',
+  is_confirmed BOOLEAN NOT NULL DEFAULT FALSE COMMENT '管理者による抽選結果確認フラグ',
+  is_ready_for_check BOOLEAN NOT NULL DEFAULT FALSE COMMENT '抽選完了フラグ',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '登録日時'
+) ENGINE=InnoDB COMMENT='抽選処理の状態を管理';
