@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイページ</title>
+    <script>
+        async function fetchUserData() {
+            const response = await fetch('/mypage');
+            if (response.ok) {
+                const userData = await response.json();
+                document.querySelector('#email').textContent = userData.email;
+                document.querySelector('#student-name').textContent = userData.student_name;
+                document.querySelector('#parent-name').textContent = userData.parent_name;
+                document.querySelector('#junior-high-school').textContent = userData.junior_high_school;
+                document.querySelector('#student-grade').textContent = `${userData.student_grade}年`;
+            } else {
+                alert('ログインが必要です。');
+                window.location.href = '/login.html';
+            }
+        }
+
+        async function logout() {
+            const response = await fetch('/logout', { method: 'POST' });
+            if (response.ok) {
+                alert('ログアウトしました。');
+                window.location.href = '/login.html';
+            } else {
+                alert('ログアウトに失敗しました。');
+            }
+        }
+
+        window.onload = fetchUserData;
+    </script>
+</head>
+
+<body>
+    <h1>マイページ</h1>
+    <p>メールアドレス: <span id="email"></span></p>
+    <p>中学生氏名: <span id="student-name"></span></p>
+    <p>保護者氏名: <span id="parent-name"></span></p>
+    <p>中学校名: <span id="junior-high-school"></span></p>
+    <p>学年: <span id="student-grade"></span></p>
+    <button onclick="logout()">ログアウト</button>
+</body>
+
+</html>

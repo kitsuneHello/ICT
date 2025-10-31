@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン</title>
+    <script>
+        async function login(event) {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const data = {
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                window.location.href = '/mypage.html';
+            } else {
+                const error = await response.text();
+                alert(`エラー: ${error}`);
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <h1>ログイン</h1>
+    <form onsubmit="login(event)">
+        <label>
+            メールアドレス:
+            <input type="email" name="email" required>
+        </label>
+        <br>
+        <label>
+            パスワード:
+            <input type="password" name="password" required>
+        </label>
+        <br>
+        <button type="submit">ログイン</button>
+    </form>
+    <a href="/register.html">アカウントを持っていない方はこちら</a>
+</body>
+
+</html>

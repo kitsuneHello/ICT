@@ -4,6 +4,7 @@ const fs = require('fs');
 const mysql = require('mysql2');
 const multer = require('multer'); // ファイルアップロード用
 const bcrypt = require('bcrypt'); // bcryptライブラリを追加
+const session = require('express-session'); // セッション管理用
 const app = express();
 const PORT = 3000;
 
@@ -33,6 +34,14 @@ connection.connect(err => {
 app.use(express.static(BASE_DIR));
 app.use(express.json()); // JSONリクエストボディを解析
 app.use(express.urlencoded({ extended: true })); // URLエンコードされたデータを解析
+
+// セッション設定
+app.use(session({
+    secret: 'your_secret_key', // セッションの暗号化キー
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // HTTPSを使用する場合はtrueに設定
+}));
 
 // ルート (/) へのGETリクエストが来た時の処理
 app.get('/', (req, res) => {
@@ -353,6 +362,79 @@ app.post('/register', async (req, res) => {
         }
         res.status(500).send('サーバーエラー: アカウント登録失敗');
     }
+});
+
+
+// ログインAPI
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).send('メールアドレスとパスワードを入力してください。');
+    }
+
+    try {
+        const [rows] = await connection.promise().query(
+            'SELECT user_id, password_hash FROM User WHERE email = ?',
+            [email]
+        );
+
+        if (rows.length === 0) {
+            return res.status(401).send('メールアドレスまたはパスワードが正しくありません。');
+        }
+
+        const user = rows[0];
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+
+        if (!isPasswordValid) {
+            return res.status(401).send('メールアドレスまたはパスワードが正しくありません。');
+        }
+
+        // セッションにユーザー情報を保存
+        req.session.userId = user.user_id;
+        res.status(200).send('ログイン成功');
+    } catch (err) {
+        console.error('ログインエラー:', err);
+        res.status(500).send('サーバーエラー: ログイン失敗');
+    }
+});
+
+
+// ログアウトAPI
+app.post('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('ログアウトエラー:', err);
+            return res.status(500).send('サーバーエラー: ログアウト失敗');
+        }
+        res.status(200).send('ログアウト成功');
+    });
+});
+
+
+// マイページAPI
+app.get('/mypage', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('ログインが必要です。');
+    }
+
+    // ユーザー情報を取得して返す
+    connection.query(
+        'SELECT email, student_name, parent_name, junior_high_school, student_grade FROM User WHERE user_id = ?',
+        [req.session.userId],
+        (err, results) => {
+            if (err) {
+                console.error('マイページ取得エラー:', err);
+                return res.status(500).send('サーバーエラー');
+            }
+
+            if (results.length === 0) {
+                return res.status(404).send('ユーザーが見つかりません。');
+            }
+
+            res.status(200).json(results[0]);
+        }
+    );
 });
 
 // サーバーを起動
