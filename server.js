@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const mysql = require('mysql2');
 const multer = require('multer'); // ファイルアップロード用
+const bcrypt = require('bcrypt'); // bcryptライブラリを追加
 const app = express();
 const PORT = 3000;
 
@@ -30,6 +31,8 @@ connection.connect(err => {
 
 // 静的ファイル（HTML, PDF 等）を配信
 app.use(express.static(BASE_DIR));
+app.use(express.json()); // JSONリクエストボディを解析
+app.use(express.urlencoded({ extended: true })); // URLエンコードされたデータを解析
 
 // ルート (/) へのGETリクエストが来た時の処理
 app.get('/', (req, res) => {
@@ -298,6 +301,58 @@ app.post('/lecture/create', upload.single('outline_pdf'), async (req, res) => {
             }
         });
     });
+});
+
+
+// アカウント登録API
+app.post('/register', async (req, res) => {
+    const {
+        email,
+        student_first_name,
+        student_last_name,
+        parent_first_name,
+        parent_last_name,
+        junior_high_school,
+        student_grade,
+        password // 平文のパスワード
+    } = req.body;
+
+    // バリデーション
+    if (!email || !student_first_name || !student_last_name || !parent_first_name || !parent_last_name ||
+        !junior_high_school || !student_grade || !password) {
+        return res.status(400).send('すべての項目を入力してください。');
+    }
+    if (!/^[1-3]$/.test(student_grade)) {
+        return res.status(400).send('学年は1〜3の範囲で指定してください。');
+    }
+
+    try {
+        // パスワードをハッシュ化
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // データベースに登録
+        await connection.promise().query(
+            `INSERT INTO User (login_id, password_hash, student_name, parent_name, junior_high_school, student_grade, email)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                email,
+                hashedPassword, // ハッシュ化されたパスワードを保存
+                `${student_last_name} ${student_first_name}`,
+                `${parent_last_name} ${parent_first_name}`,
+                junior_high_school,
+                student_grade,
+                email
+            ]
+        );
+
+        res.status(201).send('アカウントが登録されました。');
+    } catch (err) {
+        console.error('アカウント登録エラー:', err);
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).send('このメールアドレスは既に登録されています。');
+        }
+        res.status(500).send('サーバーエラー: アカウント登録失敗');
+    }
 });
 
 // サーバーを起動

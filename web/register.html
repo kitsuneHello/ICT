@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アカウント登録</title>
+    <script>
+        function showConfirmation(event) {
+            event.preventDefault();
+            const form = document.querySelector('#registration-form');
+            const formData = new FormData(form);
+
+            const password = formData.get('password');
+            const passwordConfirm = formData.get('password_confirm');
+
+            if (password !== passwordConfirm) {
+                alert('パスワードが一致しません。');
+                return;
+            }
+
+            // 入力内容を確認画面に表示
+            document.querySelector('#confirm-email').textContent = formData.get('email');
+            document.querySelector('#confirm-student-name').textContent = `${formData.get('student_last_name')} ${formData.get('student_first_name')}`;
+            document.querySelector('#confirm-parent-name').textContent = `${formData.get('parent_last_name')} ${formData.get('parent_first_name')}`;
+            document.querySelector('#confirm-junior-high-school').textContent = formData.get('junior_high_school');
+            document.querySelector('#confirm-student-grade').textContent = `${formData.get('student_grade')}年`;
+            document.querySelector('#confirm-password').textContent = password;
+
+            // 確認画面を表示
+            document.querySelector('#registration-form').style.display = 'none';
+            document.querySelector('#confirmation-screen').style.display = 'block';
+        }
+
+        async function register(event) {
+            event.preventDefault();
+            const form = document.querySelector('#registration-form');
+            const formData = new FormData(form);
+
+            const data = {
+                email: formData.get('email'),
+                student_first_name: formData.get('student_first_name'),
+                student_last_name: formData.get('student_last_name'),
+                parent_first_name: formData.get('parent_first_name'),
+                parent_last_name: formData.get('parent_last_name'),
+                junior_high_school: formData.get('junior_high_school'),
+                student_grade: formData.get('student_grade'),
+                password: formData.get('password') // 平文のパスワードを送信
+            };
+
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                alert('アカウントが登録されました。');
+                form.reset();
+                document.querySelector('#confirmation-screen').style.display = 'none';
+                document.querySelector('#registration-form').style.display = 'block';
+            } else {
+                const error = await response.text();
+                alert(`エラー: ${error}`);
+            }
+        }
+
+        function goBackToForm() {
+            document.querySelector('#confirmation-screen').style.display = 'none';
+            document.querySelector('#registration-form').style.display = 'block';
+        }
+    </script>
+</head>
+
+<body>
+    <h1>アカウント登録</h1>
+
+    <!-- 登録フォーム -->
+    <form id="registration-form" onsubmit="showConfirmation(event)">
+        <label>
+            メールアドレス:
+            <input type="email" name="email" required>
+        </label>
+        <br>
+        <label>
+            中学生氏名（姓）:
+            <input type="text" name="student_last_name" required>
+        </label>
+        <label>
+            （名）:
+            <input type="text" name="student_first_name" required>
+        </label>
+        <br>
+        <label>
+            保護者氏名（姓）:
+            <input type="text" name="parent_last_name" required>
+        </label>
+        <label>
+            （名）:
+            <input type="text" name="parent_first_name" required>
+        </label>
+        <br>
+        <label>
+            中学校名:
+            <input type="text" name="junior_high_school" required>
+        </label>
+        <br>
+        <label>
+            学年:
+            <select name="student_grade" required>
+                <option value="1">1年</option>
+                <option value="2">2年</option>
+                <option value="3">3年</option>
+            </select>
+        </label>
+        <br>
+        <label>
+            パスワード:
+            <input type="password" name="password" required>
+        </label>
+        <br>
+        <label>
+            パスワード（確認用）:
+            <input type="password" name="password_confirm" required>
+        </label>
+        <br>
+        <button type="submit">入力内容を確認</button>
+    </form>
+
+    <!-- 確認画面 -->
+    <div id="confirmation-screen" style="display: none;">
+        <h2>入力内容確認</h2>
+        <p>メールアドレス: <span id="confirm-email"></span></p>
+        <p>中学生氏名: <span id="confirm-student-name"></span></p>
+        <p>保護者氏名: <span id="confirm-parent-name"></span></p>
+        <p>中学校名: <span id="confirm-junior-high-school"></span></p>
+        <p>学年: <span id="confirm-student-grade"></span></p>
+        <p>パスワード: <span id="confirm-password"></span></p>
+        <button onclick="goBackToForm()">内容の修正</button>
+        <button onclick="register(event)">この内容でアカウントを登録</button>
+    </div>
+</body>
+
+</html>
