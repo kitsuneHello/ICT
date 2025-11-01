@@ -437,6 +437,95 @@ app.get('/mypage', (req, res) => {
     );
 });
 
+
+// マイページ用申込情報取得API
+app.get('/mypage', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('ログインが必要です。');
+    }
+    connection.query(
+        `SELECT email, student_name, parent_name, junior_high_school, student_grade,
+                (SELECT JSON_ARRAYAGG(JSON_OBJECT('lecture_name', ml.lecture_name, 'datetime', CONCAT(s.start_datetime, ' - ', s.end_datetime)))
+                 FROM Application a
+                 JOIN Session s ON a.session_id = s.session_id
+                 JOIN Mock_Lecture ml ON s.lecture_id = ml.lecture_id
+                 WHERE a.user_id = u.user_id) AS applications
+         FROM User u WHERE user_id = ?`,
+        [req.session.userId],
+        (err, results) => {
+            if (err) {
+                console.error('マイページ取得エラー:', err);
+                return res.status(500).send('サーバーエラー');
+            }
+            if (results.length === 0) {
+                return res.status(404).send('ユーザーが見つかりません。');
+            }
+            res.status(200).json(results[0]);
+        }
+    );
+});
+
+// 抽選申込ページ用セッション取得API
+app.get('/sessions', (req, res) => {
+    connection.query(
+        `SELECT s.session_id, ml.lecture_name, CONCAT(s.start_datetime, ' - ', s.end_datetime) AS datetime
+         FROM Session s
+         JOIN Mock_Lecture ml ON s.lecture_id = ml.lecture_id`,
+        (err, results) => {
+            if (err) {
+                console.error('セッション取得エラー:', err);
+                return res.status(500).send('サーバーエラー');
+            }
+            res.status(200).json(results);
+        }
+    );
+});
+
+// 抽選申込API
+app.post('/submit-application', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('ログインが必要です。');
+    }
+    const { session_ids } = req.body;
+    if (!Array.isArray(session_ids) || session_ids.length === 0 || session_ids.length > 3) {
+        return res.status(400).send('選択は1〜3件までです。');
+    }
+    const values = session_ids.map(id => [req.session.userId, id]);
+    connection.query(
+        'INSERT INTO Application (user_id, session_id) VALUES ?',
+        [values],
+        (err) => {
+            if (err) {
+                console.error('申し込みエラー:', err);
+                return res.status(500).send('サーバーエラー');
+            }
+            res.status(201).send('申し込みが完了しました。');
+        }
+    );
+});
+
+// ユーザー情報取得API
+app.get('/user-info', (req, res) => {
+    if (!req.session.userId) {
+        return res.status(401).send('ログインが必要です。');
+    }
+
+    connection.query(
+        'SELECT student_name, parent_name, junior_high_school, student_grade, email FROM User WHERE user_id = ?',
+        [req.session.userId],
+        (err, results) => {
+            if (err) {
+                console.error('ユーザー情報取得エラー:', err);
+                return res.status(500).send('サーバーエラー');
+            }
+            if (results.length === 0) {
+                return res.status(404).send('ユーザーが見つかりません。');
+            }
+            res.status(200).json(results[0]);
+        }
+    );
+});
+
 // サーバーを起動
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`サーバーがポート ${PORT} で起動しました。`);

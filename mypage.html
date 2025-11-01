@@ -15,6 +15,29 @@
                 document.querySelector('#parent-name').textContent = userData.parent_name;
                 document.querySelector('#junior-high-school').textContent = userData.junior_high_school;
                 document.querySelector('#student-grade').textContent = `${userData.student_grade}年`;
+
+                const applicationInfo = document.querySelector('#application-info');
+                if (userData.applications && userData.applications.length > 0) {
+                    const table = document.createElement('table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>模擬授業名</th>
+                            <th>日時</th>
+                        </tr>
+                        ${userData.applications.map(app => `
+                            <tr>
+                                <td>${app.lecture_name}</td>
+                                <td>${app.datetime}</td>
+                            </tr>
+                        `).join('')}
+                    `;
+                    applicationInfo.appendChild(table);
+                } else {
+                    const button = document.createElement('button');
+                    button.textContent = '申し込みはこちら';
+                    button.onclick = () => window.location.href = '/application.html';
+                    applicationInfo.appendChild(button);
+                }
             } else {
                 alert('ログインが必要です。');
                 window.location.href = '/login.html';
@@ -42,6 +65,8 @@
     <p>保護者氏名: <span id="parent-name"></span></p>
     <p>中学校名: <span id="junior-high-school"></span></p>
     <p>学年: <span id="student-grade"></span></p>
+    <h2>あなたの申し込み</h2>
+    <div id="application-info"></div>
     <button onclick="logout()">ログアウト</button>
 </body>
 

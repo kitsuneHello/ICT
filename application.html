@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抽選申込</title>
+    <script>
+        let selectedApplications = [];
+
+        async function fetchSessions() {
+            const response = await fetch('/sessions');
+            const sessions = await response.json();
+            const tableBody = document.querySelector('#session-table tbody');
+            tableBody.innerHTML = sessions.map(session => `
+                <tr>
+                    <td><input type="checkbox" value="${session.session_id}" onchange="toggleSelection(this)"></td>
+                    <td>${session.lecture_name}</td>
+                    <td>${session.datetime}</td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleSelection(checkbox) {
+            if (checkbox.checked) {
+                if (selectedApplications.length >= 3) {
+                    alert('選択は最大3件までです。');
+                    checkbox.checked = false;
+                    return;
+                }
+                selectedApplications.push(checkbox.value);
+            } else {
+                selectedApplications = selectedApplications.filter(id => id !== checkbox.value);
+            }
+        }
+
+        async function confirmSelection() {
+            if (selectedApplications.length === 0) {
+                alert('少なくとも1件選択してください。');
+                return;
+            }
+
+            // 表を非表示にする
+            document.querySelector('#session-table').style.display = 'none';
+            document.querySelector('#confirm-button').style.display = 'none';
+
+            // ユーザー情報を取得
+            const userInfoResponse = await fetch('/user-info');
+            const userInfo = await userInfoResponse.json();
+
+            // 確認内容を表示
+            const confirmation = document.querySelector('#confirmation');
+            confirmation.innerHTML = `
+                <h3>確認内容</h3>
+                <p>選択した模擬授業:</p>
+                <ul>
+                    ${selectedApplications.map(id => `<li>${id}</li>`).join('')}
+                </ul>
+                <p>申込情報:</p>
+                <ul>
+                    <li>中学生氏名: ${userInfo.student_name}</li>
+                    <li>保護者氏名: ${userInfo.parent_name}</li>
+                    <li>学校名: ${userInfo.junior_high_school}</li>
+                    <li>学年: ${userInfo.student_grade}</li>
+                    <li>結果送信先メールアドレス: ${userInfo.email}</li>
+                </ul>
+                <button onclick="submitApplication()">申し込み</button>
+                <button onclick="modifySelection()">修正</button>
+            `;
+        }
+
+        function modifySelection() {
+            // 表を再表示
+            document.querySelector('#session-table').style.display = 'table';
+            document.querySelector('#confirm-button').style.display = 'inline-block';
+
+            // 確認内容をクリア
+            document.querySelector('#confirmation').innerHTML = '';
+        }
+
+        async function submitApplication() {
+            const response = await fetch('/submit-application', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_ids: selectedApplications })
+            });
+            if (response.ok) {
+                alert('申し込みが完了しました。');
+                window.location.href = '/mypage.html';
+            } else {
+                alert('申し込みに失敗しました。');
+            }
+        }
+
+        window.onload = fetchSessions;
+    </script>
+</head>
+
+<body>
+    <h1>抽選申込</h1>
+    <table id="session-table" border="1">
+        <thead>
+            <tr>
+                <th>選択</th>
+                <th>模擬授業名</th>
+                <th>日時</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button id="confirm-button" onclick="confirmSelection()">確認</button>
+    <div id="confirmation"></div>
+</body>
+
+</html>
