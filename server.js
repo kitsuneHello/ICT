@@ -443,37 +443,6 @@ app.get('/mypage', (req, res) => {
     );
 });
 
-// マイページ用申込情報取得API
-app.get('/mypage', (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).send('ログインが必要です。');
-    }
-    connection.query(
-        `SELECT email, student_name, parent_name, junior_high_school, student_grade,
-                (SELECT JSON_ARRAYAGG(JSON_OBJECT(
-                    'lecture_name', ml.lecture_name, 
-                    'datetime', CONCAT(DATE_FORMAT(s.start_datetime, '%Y年%m月%d日 %H:%i'), ' - ', DATE_FORMAT(s.end_datetime, '%H:%i')),
-                    'lottery_result', a.lottery_result
-                ))
-                 FROM Application a
-                 JOIN Session s ON a.session_id = s.session_id
-                 JOIN Mock_Lecture ml ON s.lecture_id = ml.lecture_id
-                 WHERE a.user_id = u.user_id) AS applications
-         FROM User u WHERE user_id = ?`,
-        [req.session.userId],
-        (err, results) => {
-            if (err) {
-                console.error('マイページ取得エラー:', err);
-                return res.status(500).send('サーバーエラー');
-            }
-            if (results.length === 0) {
-                return res.status(404).send('ユーザーが見つかりません。');
-            }
-            res.status(200).json(results[0]);
-        }
-    );
-});
-
 // 抽選申込ページ用セッション取得API
 app.get('/sessions', (req, res) => {
     connection.query(
