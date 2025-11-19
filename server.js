@@ -443,7 +443,7 @@ app.get('/mypage', (req, res) => {
     );
 });
 
-// 抽選申込ページ用セッション取得API
+// 抽選申込ページ用実施回取得API
 app.get('/sessions', (req, res) => {
     connection.query(
         `SELECT s.session_id, ml.lecture_name, CONCAT(s.start_datetime, ' - ', s.end_datetime) AS datetime
@@ -451,7 +451,7 @@ app.get('/sessions', (req, res) => {
          JOIN Mock_Lecture ml ON s.lecture_id = ml.lecture_id`,
         (err, results) => {
             if (err) {
-                console.error('セッション取得エラー:', err);
+                console.error('実施回取得エラー:', err);
                 return res.status(500).send('サーバーエラー');
             }
             res.status(200).json(results);
@@ -504,11 +504,11 @@ app.get('/user-info', (req, res) => {
     );
 });
 
-// セッション詳細取得API
+// 実施回詳細取得API
 app.get('/session-detail', (req, res) => {
     const sessionId = req.query.id;
     if (!sessionId) {
-        return res.status(400).send('セッションIDが指定されていません。');
+        return res.status(400).send('実施回IDが指定されていません。');
     }
 
     connection.query(
@@ -521,11 +521,11 @@ app.get('/session-detail', (req, res) => {
         [sessionId],
         (err, results) => {
             if (err) {
-                console.error('セッション詳細取得エラー:', err);
+                console.error('実施回詳細取得エラー:', err);
                 return res.status(500).send('サーバーエラー');
             }
             if (results.length === 0) {
-                return res.status(404).send('該当するセッションが見つかりません。');
+                return res.status(404).send('該当する実施回が見つかりません。');
             }
             res.status(200).json(results[0]);
         }
