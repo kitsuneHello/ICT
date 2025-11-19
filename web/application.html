@@ -48,13 +48,21 @@
             const userInfoResponse = await fetch('/user-info');
             const userInfo = await userInfoResponse.json();
 
+            // 選択したセッション情報を取得
+            const sessionDetails = await Promise.all(selectedApplications.map(async (id) => {
+                const response = await fetch(`/session-detail?id=${id}`);
+                return response.json();
+            }));
+
             // 確認内容を表示
             const confirmation = document.querySelector('#confirmation');
             confirmation.innerHTML = `
                 <h3>確認内容</h3>
                 <p>選択した模擬授業:</p>
                 <ul>
-                    ${selectedApplications.map(id => `<li>${id}</li>`).join('')}
+                    ${sessionDetails.map(session => `
+                        <li>${session.lecture_name} (${session.start_datetime} - ${session.end_time})</li>
+                    `).join('')}
                 </ul>
                 <p>申込情報:</p>
                 <ul>

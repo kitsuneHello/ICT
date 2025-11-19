@@ -23,11 +23,13 @@
                         <tr>
                             <th>模擬授業名</th>
                             <th>日時</th>
+                            <th>抽選状況</th>
                         </tr>
                         ${userData.applications.map(app => `
                             <tr>
                                 <td>${app.lecture_name}</td>
                                 <td>${app.datetime}</td>
+                                <td>${app.lottery_result === 'PENDING' ? '抽選前' : app.lottery_result === 'WIN' ? '当選' : '落選'}</td>
                             </tr>
                         `).join('')}
                     `;

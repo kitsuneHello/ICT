@@ -63,7 +63,7 @@ app.get('/', (req, res) => {
                 // lecture_id は数値なのでそのまま埋める
                 const id = row.lecture_id;
                 const nameEscaped = String(row.lecture_name).replace(/"/g, '&quot;');
-                return `<a href="/lecture?id=${id}"><button value="${nameEscaped}">${nameEscaped}</button></a><br>`;
+                return `<a href="/lecture?id=${id}" target="_blank"><button value="${nameEscaped}">${nameEscaped}</button></a><br>`;
             }).join('\n');
 
             // toppage.html の <div id="lecture-list"> の内部に boxes を挿入する
@@ -417,26 +417,31 @@ app.get('/mypage', (req, res) => {
     if (!req.session.userId) {
         return res.status(401).send('ログインが必要です。');
     }
-
-    // ユーザー情報を取得して返す
     connection.query(
-        'SELECT email, student_name, parent_name, junior_high_school, student_grade FROM User WHERE user_id = ?',
+        `SELECT email, student_name, parent_name, junior_high_school, student_grade,
+                (SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                    'lecture_name', ml.lecture_name, 
+                    'datetime', CONCAT(DATE_FORMAT(s.start_datetime, '%Y年%m月%d日 %H:%i'), ' - ', DATE_FORMAT(s.end_datetime, '%H:%i')),
+                    'lottery_result', a.lottery_result
+                ))
+                 FROM Application a
+                 JOIN Session s ON a.session_id = s.session_id
+                 JOIN Mock_Lecture ml ON s.lecture_id = ml.lecture_id
+                 WHERE a.user_id = u.user_id) AS applications
+         FROM User u WHERE user_id = ?`,
         [req.session.userId],
         (err, results) => {
             if (err) {
                 console.error('マイページ取得エラー:', err);
                 return res.status(500).send('サーバーエラー');
             }
-
             if (results.length === 0) {
                 return res.status(404).send('ユーザーが見つかりません。');
             }
-
             res.status(200).json(results[0]);
         }
     );
 });
-
 
 // マイページ用申込情報取得API
 app.get('/mypage', (req, res) => {
@@ -445,7 +450,11 @@ app.get('/mypage', (req, res) => {
     }
     connection.query(
         `SELECT email, student_name, parent_name, junior_high_school, student_grade,
-                (SELECT JSON_ARRAYAGG(JSON_OBJECT('lecture_name', ml.lecture_name, 'datetime', CONCAT(s.start_datetime, ' - ', s.end_datetime)))
+                (SELECT JSON_ARRAYAGG(JSON_OBJECT(
+                    'lecture_name', ml.lecture_name, 
+                    'datetime', CONCAT(DATE_FORMAT(s.start_datetime, '%Y年%m月%d日 %H:%i'), ' - ', DATE_FORMAT(s.end_datetime, '%H:%i')),
+                    'lottery_result', a.lottery_result
+                ))
                  FROM Application a
                  JOIN Session s ON a.session_id = s.session_id
                  JOIN Mock_Lecture ml ON s.lecture_id = ml.lecture_id
@@ -520,6 +529,34 @@ app.get('/user-info', (req, res) => {
             }
             if (results.length === 0) {
                 return res.status(404).send('ユーザーが見つかりません。');
+            }
+            res.status(200).json(results[0]);
+        }
+    );
+});
+
+// セッション詳細取得API
+app.get('/session-detail', (req, res) => {
+    const sessionId = req.query.id;
+    if (!sessionId) {
+        return res.status(400).send('セッションIDが指定されていません。');
+    }
+
+    connection.query(
+        `SELECT s.session_id, ml.lecture_name, 
+                DATE_FORMAT(s.start_datetime, '%Y年%m月%d日 %H:%i') AS start_datetime, 
+                DATE_FORMAT(s.end_datetime, '%H:%i') AS end_time
+         FROM Session s
+         JOIN Mock_Lecture ml ON s.lecture_id = ml.lecture_id
+         WHERE s.session_id = ?`,
+        [sessionId],
+        (err, results) => {
+            if (err) {
+                console.error('セッション詳細取得エラー:', err);
+                return res.status(500).send('サーバーエラー');
+            }
+            if (results.length === 0) {
+                return res.status(404).send('該当するセッションが見つかりません。');
             }
             res.status(200).json(results[0]);
         }

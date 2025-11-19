@@ -14,6 +14,13 @@
             const password = formData.get('password');
             const passwordConfirm = formData.get('password_confirm');
 
+            // パスワードのバリデーション
+            const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{};':",.<>?\\|`~\-=/]).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                alert('パスワードは8文字以上で、英字、数字、記号(!@#$%^&*()_+[]{};\':",.<>?\\|`~\\-=/)を含む必要があります。');
+                return;
+            }
+
             if (password !== passwordConfirm) {
                 alert('パスワードが一致しません。');
                 return;
@@ -55,10 +62,8 @@
             });
 
             if (response.ok) {
-                alert('アカウントが登録されました。');
-                form.reset();
-                document.querySelector('#confirmation-screen').style.display = 'none';
-                document.querySelector('#registration-form').style.display = 'block';
+                alert('アカウントが登録されました。ログインページに移動します。');
+                window.location.href = '/login.html'; // ログインページに遷移
             } else {
                 const error = await response.text();
                 alert(`エラー: ${error}`);
