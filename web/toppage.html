@@ -3,17 +3,150 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>トップページ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin: 20px 0;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+
+        .lecture-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-auto-rows: auto;
+            gap: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            justify-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .lecture-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .lecture-list {
+                grid-template-columns: repeat(1, 1fr);
+            }
+        }
+
+        .lecture-list a {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+            width: 200px;
+        }
+
+        .lecture-list a:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .navigation a {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .navigation a:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .instructions {
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: left;
+            font-size: 0.9em;
+        }
+
+        .system-info {
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+            font-size: 0.9em;
+            color: red;
+            font-weight: bold;
+        }
+
+        .title-bar {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 
 <body>
-    <h1>講義一覧</h1>
-    <div class="lecture-list" id="lecture-list">
+    <div class="title-bar">S高等専門学校</div>
+    <h1>OPEN CAMPUS</h1>
+    <br>
+    <div class="instructions">
+        <p>S高等専門学校のオープンキャンパスでは模擬授業を開講しています！</p>
+        <p>以下の模擬授業一覧から模擬授業の詳細をご確認ください。</p>
+    </div>
+    <br>
+    <h2>＜模擬授業一覧＞</h2>
+    <div class="lecture-list">
         <!--LECTURE_LIST_PLACEHOLDER-->
     </div>
-    <div class="account-actions">
-        <a href="/register.html" target="_blank"><button>アカウント作成はこちら</button></a>
-        <a href="/login.html" target="_blank"><button>マイページはこちら</button></a>
+    <br>
+    <div class="system-info">
+        <!--reception-period--><!--左のコメント消さないで！！-->
+        <!--lottery-datetime--><!--左のコメント消さないで！！-->
+    </div>
+    <p>模擬授業の事前申し込みは、アカウント作成後、マイページよりお申し込みをお願い致します。</p>
+    <div class="navigation">
+        <a href="/register.html" target="_blank">アカウント作成</a>
+        <a href="/mypage.html" target="_blank">マイページに進む</a>
+    </div>
+    <br>
+    <div class="instructions">
+        <p>※ 事前申し込みはお一人様3件までとさせていただきます。</p>
+        <p>※ 事前申し込み期間終了後、模擬授業の申し込み者数が定員を超えた場合は抽選を行います。定員に達さなかった場合は申込者全員が参加確定となります。</p>
+        <p>※ 抽選申込の結果は抽選確定後にマイページよりご確認いただけます。また、アカウント作成時に登録いただいたメールアドレスにも個別結果を送信いたします。</p>
     </div>
 </body>
 

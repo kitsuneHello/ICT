@@ -43,36 +43,102 @@ app.use(session({
     cookie: { secure: false } // HTTPSを使用する場合はtrueに設定
 }));
 
+// is_activeチェック用ミドルウェア
+//is_activeは中学生向けのサイトを公開するかどうか
+const checkSystemActive = (req, res, next) => {
+    connection.query(
+        'SELECT is_active FROM Reception_Period ORDER BY start_datetime DESC LIMIT 1',
+        (err, results) => {
+            if (err) {
+                console.error('システム状態確認エラー:', err);
+                return res.status(500).send('サーバーエラー: システム状態確認失敗');
+            }
+            if (results.length === 0 || results[0].is_active !== 1) {
+                return res.status(503).send('現在、システムは利用できません。');
+            }
+            next();
+        }
+    );
+};
+
+// ミドルウェアを全ルートに適用
+app.use(checkSystemActive);
+
 // ルート (/) へのGETリクエストが来た時の処理
 app.get('/', (req, res) => {
-    // DBから講義一覧を取得して toppage.html の指定箇所にボックスを挿入して返す
-    connection.query('SELECT lecture_id, lecture_name FROM Mock_Lecture', (err, results) => {
-        if (err) {
-            console.error('DB取得エラー', err);
-            return res.status(500).send('サーバーエラー');
-        }
-
-        fs.readFile(path.join(BASE_DIR, 'toppage.html'), 'utf8', (err, htmlContent) => {
+    connection.query(
+        `SELECT 
+            rp.start_datetime AS reception_start, 
+            rp.end_datetime AS reception_end, 
+            rp.is_active, 
+            lc.lottery_datetime 
+         FROM Reception_Period rp 
+         LEFT JOIN Lottery_Control lc ON 1 = 1 -- 条件を指定しない場合、ON 1=1 を使用
+         WHERE rp.is_active = TRUE 
+         ORDER BY rp.start_datetime DESC LIMIT 1`,
+        (err, results) => {
             if (err) {
-                console.error('toppage読み込みエラー', err);
-                return res.status(500).send('サーバーエラー: ファイル読み込み失敗');
+                console.error('DB取得エラー', err);
+                return res.status(500).send('サーバーエラー');
             }
 
-            // 講義ボックス生成（リンクは lecture_id をクエリにして /lecture に飛ばす）
-            const boxes = results.map(row => {
-                // lecture_id は数値なのでそのまま埋める
-                const id = row.lecture_id;
-                const nameEscaped = String(row.lecture_name).replace(/"/g, '&quot;');
-                return `<a href="/lecture?id=${id}" target="_blank"><button value="${nameEscaped}">${nameEscaped}</button></a><br>`;
-            }).join('\n');
+            connection.query('SELECT lecture_id, lecture_name FROM Mock_Lecture', (err, lectures) => {
+                if (err) {
+                    console.error('講義一覧取得エラー', err);
+                    return res.status(500).send('サーバーエラー');
+                }
 
-            // toppage.html の <div id="lecture-list"> の内部に boxes を挿入する
-            const modifiedHtml = htmlContent.replace('<!--LECTURE_LIST_PLACEHOLDER-->', boxes);
+                fs.readFile(path.join(BASE_DIR, 'toppage.html'), 'utf8', (err, htmlContent) => {
+                    if (err) {
+                        console.error('toppage読み込みエラー', err);
+                        return res.status(500).send('サーバーエラー: ファイル読み込み失敗');
+                    }
 
-            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-            res.end(modifiedHtml);
-        });
-    });
+                    let receptionInfo = '';
+                    let lotteryInfo = '';
+                    let systemStatus = '';
+
+                    // 日時をフォーマットする関数
+                    const formatDateTime = (datetime) => {
+                        const [date, time] = datetime.split(' ');
+                        const [year, month, day] = date.split('-');
+                        const [hour, minute] = time.split(':');
+                        return `${year}年${month}月${day}日 ${hour}時${minute}分`;
+                    };
+
+                    if (results.length > 0) {
+                        const { reception_start, reception_end, is_active, lottery_datetime } = results[0];
+
+                        if (!is_active) {
+                            systemStatus = '現在、システムは利用できません。';
+                        } else {
+                            receptionInfo = `申し込み期間: ${formatDateTime(reception_start)} 〜 ${formatDateTime(reception_end)}`;
+                            lotteryInfo = lottery_datetime
+                                ? `抽選日時: ${formatDateTime(lottery_datetime)}`
+                                : '抽選日時: 未定';
+                        }
+                    } else {
+                        systemStatus = '現在、システムは利用できません。';
+                    }
+
+                    // 講義一覧のリンク生成
+                    const boxes = lectures.map(row => {
+                        const id = row.lecture_id;
+                        const nameEscaped = String(row.lecture_name).replace(/"/g, '&quot;');
+                        return `<a href="/lecture?id=${id}" target="_blank">${nameEscaped}</a>`;
+                    }).join('');
+
+                    const modifiedHtml = htmlContent
+                        .replace('<!--reception-period-->', `<h3>${receptionInfo}</h3>`)
+                        .replace('<!--lottery-datetime-->', `<h3>${lotteryInfo}</h3>`)
+                        .replace('<!--LECTURE_LIST_PLACEHOLDER-->', boxes);
+
+                    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                    res.end(modifiedHtml);
+                });
+            });
+        }
+    );
 });
 
 //模擬授業詳細ページへ遷移するapi
