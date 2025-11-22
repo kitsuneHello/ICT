@@ -5,6 +5,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>マイページ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin: 20px 0;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+
+        .info {
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: left;
+            font-size: 1em;
+        }
+
+        .info p {
+            margin: 10px 0;
+        }
+
+        .application-info {
+            margin: 20px auto;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .application-info table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .application-info th,
+        .application-info td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .application-info th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        .application-info td {
+            background-color: #f9f9f9;
+        }
+
+        .application-info button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, transform 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .application-info button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .logout-button {
+            margin: 20px 0;
+            padding: 10px 20px;
+            background-color: #FF4136;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .logout-button:hover {
+            background-color: #C0392B;
+            transform: translateY(-2px);
+        }
+
+        .title-bar {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
     <script>
         async function fetchUserData() {
             const response = await fetch('/mypage');
@@ -18,6 +124,13 @@
 
                 const applicationInfo = document.querySelector('#application-info');
                 if (userData.applications && userData.applications.length > 0) {
+                    // 開始日時でソート
+                    userData.applications.sort((a, b) => {
+                        const dateA = new Date(a.datetime.split(' - ')[0].replace(/年|月|日|時|分/g, ' ').trim());
+                        const dateB = new Date(b.datetime.split(' - ')[0].replace(/年|月|日|時|分/g, ' ').trim());
+                        return dateA - dateB;
+                    });
+
                     const table = document.createElement('table');
                     table.innerHTML = `
                         <tr>
@@ -35,10 +148,26 @@
                     `;
                     applicationInfo.appendChild(table);
                 } else {
-                    const button = document.createElement('button');
-                    button.textContent = '申し込みはこちら';
-                    button.onclick = () => window.location.href = '/application.html';
-                    applicationInfo.appendChild(button);
+                    const periodResponse = await fetch('/reception-period');
+                    if (periodResponse.ok) {
+                        const periodData = await periodResponse.json();
+                        const now = new Date();
+                        const start = new Date(periodData.start_datetime);
+                        const end = new Date(periodData.end_datetime);
+
+                        if (now >= start && now <= end) {
+                            const button = document.createElement('button');
+                            button.textContent = '申し込みはこちら';
+                            button.onclick = () => window.location.href = '/application.html';
+                            applicationInfo.appendChild(button);
+                        } else {
+                            const message = document.createElement('p');
+                            message.textContent = `模擬授業の申し込みは${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日 ${start.getHours()}時${start.getMinutes()}分開始`;
+                            applicationInfo.appendChild(message);
+                        }
+                    } else {
+                        alert('受付期間情報の取得に失敗しました。');
+                    }
                 }
             } else {
                 alert('ログインが必要です。');
@@ -61,15 +190,18 @@
 </head>
 
 <body>
+    <div class="title-bar">S高等専門学校</div>
     <h1>マイページ</h1>
-    <p>メールアドレス: <span id="email"></span></p>
-    <p>中学生氏名: <span id="student-name"></span></p>
-    <p>保護者氏名: <span id="parent-name"></span></p>
-    <p>中学校名: <span id="junior-high-school"></span></p>
-    <p>学年: <span id="student-grade"></span></p>
+    <div class="info">
+        <p>メールアドレス: <span id="email"></span></p>
+        <p>中学生氏名: <span id="student-name"></span></p>
+        <p>保護者氏名: <span id="parent-name"></span></p>
+        <p>中学校名: <span id="junior-high-school"></span></p>
+        <p>学年: <span id="student-grade"></span></p>
+    </div>
     <h2>あなたの申し込み</h2>
-    <div id="application-info"></div>
-    <button onclick="logout()">ログアウト</button>
+    <div id="application-info" class="application-info"></div>
+    <button class="logout-button" onclick="logout()">ログアウト</button>
 </body>
 
 </html>

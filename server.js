@@ -587,6 +587,23 @@ app.get('/session-detail', (req, res) => {
     );
 });
 
+// 受付期間取得API
+app.get('/reception-period', (req, res) => {
+    connection.query(
+        'SELECT start_datetime, end_datetime FROM Reception_Period LIMIT 1',
+        (err, results) => {
+            if (err) {
+                console.error('受付期間取得エラー:', err);
+                return res.status(500).send('サーバーエラー');
+            }
+            if (results.length === 0) {
+                return res.status(404).send('受付期間が設定されていません。');
+            }
+            res.status(200).json(results[0]);
+        }
+    );
+});
+
 // サーバーを起動
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`サーバーがポート ${PORT} で起動しました。`);
