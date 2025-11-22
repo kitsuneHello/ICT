@@ -47,13 +47,13 @@ app.use(session({
 //is_activeは中学生向けのサイトを公開するかどうか
 const checkSystemActive = (req, res, next) => {
     connection.query(
-        'SELECT is_active FROM Reception_Period ORDER BY start_datetime DESC LIMIT 1',
+        'SELECT COUNT(*) AS count FROM Reception_Period',
         (err, results) => {
             if (err) {
                 console.error('システム状態確認エラー:', err);
                 return res.status(500).send('サーバーエラー: システム状態確認失敗');
             }
-            if (results.length === 0 || results[0].is_active !== 1) {
+            if (results[0].count === 0) {
                 return res.status(503).send('現在、システムは利用できません。');
             }
             next();
@@ -70,12 +70,9 @@ app.get('/', (req, res) => {
         `SELECT 
             rp.start_datetime AS reception_start, 
             rp.end_datetime AS reception_end, 
-            rp.is_active, 
             lc.lottery_datetime 
          FROM Reception_Period rp 
-         LEFT JOIN Lottery_Control lc ON 1 = 1 -- 条件を指定しない場合、ON 1=1 を使用
-         WHERE rp.is_active = TRUE 
-         ORDER BY rp.start_datetime DESC LIMIT 1`,
+         LEFT JOIN Lottery_Control lc ON 1 = 1`,
         (err, results) => {
             if (err) {
                 console.error('DB取得エラー', err);
@@ -106,20 +103,12 @@ app.get('/', (req, res) => {
                         return `${year}年${month}月${day}日 ${hour}時${minute}分`;
                     };
 
-                    if (results.length > 0) {
-                        const { reception_start, reception_end, is_active, lottery_datetime } = results[0];
+                    const { reception_start, reception_end, lottery_datetime } = results[0];
 
-                        if (!is_active) {
-                            systemStatus = '現在、システムは利用できません。';
-                        } else {
-                            receptionInfo = `申し込み期間: ${formatDateTime(reception_start)} 〜 ${formatDateTime(reception_end)}`;
-                            lotteryInfo = lottery_datetime
-                                ? `抽選日時: ${formatDateTime(lottery_datetime)}`
-                                : '抽選日時: 未定';
-                        }
-                    } else {
-                        systemStatus = '現在、システムは利用できません。';
-                    }
+                    receptionInfo = `申し込み期間: ${formatDateTime(reception_start)} 〜 ${formatDateTime(reception_end)}`;
+                    lotteryInfo = lottery_datetime
+                        ? `抽選日時: ${formatDateTime(lottery_datetime)}`
+                        : '抽選日時: 未定';
 
                     // 講義一覧のリンク生成
                     const boxes = lectures.map(row => {
