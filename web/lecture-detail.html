@@ -2,70 +2,180 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <title>講義詳細</title>
     <style>
+        :root {
+            --primary: #007BFF;
+            --primary-dark: #0056b3;
+            --card-bg: #ffffff;
+            --page-bg: #f5f7fb;
+            --radius: 8px;
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        }
+
         body {
-            font-family: sans-serif;
-            padding: 16px;
+            font-family: Arial, sans-serif;
+            background: var(--page-bg);
+            margin: 0;
+            padding: 20px;
+            color: #222;
         }
 
-        .header {
-            margin-bottom: 12px;
+        .title-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 1.25em;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            max-width: 980px;
+            margin: 0 auto 18px;
         }
 
-        .pdf-viewer {
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.6em;
+        }
+
+        .outline h2,
+        .sessions h2 {
+            margin-top: 0;
+        }
+
+        .pdf-frame {
             width: 100%;
-            height: 700px;
-            border: 1px solid #ccc;
+            height: 60vh;
+            min-height: 360px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .pdf-frame embed {
+            width: 100%;
+            height: 100%;
+            border: 0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 16px;
+            margin-top: 12px;
         }
 
         th,
         td {
-            padding: 8px;
+            padding: 10px;
             text-align: left;
-            border: 1px solid #ccc;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95em;
         }
 
         th {
-            background-color: #f2f2f2;
+            background: #f7f9fc;
+            color: #333;
+            font-weight: 700;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 720px) {
+            .container {
+                padding: 0 12px;
+            }
+
+            .meta-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h1>{{LECTURE_NAME}}</h1>
-    </div>
+    <div class="title-bar">S高等専門学校</div>
+    <div class="container">
+        <div class="card header">
+            <h1>{{LECTURE_NAME}}</h1>
+            <div class="meta-row">
+                <!-- 必要ならここに教員名や一行説明を挿入 -->
+                <div class="actions">
+                    <!-- 追加のボタンが必要ならここに置く（例: 申し込みページへのリンク） -->
+                    <!-- ...existing code... -->
+                </div>
+            </div>
+        </div>
 
-    <div class="outline">
-        <h2>講義概要（PDF）</h2>
-        <embed src="{{PDF_PATH}}" type="application/pdf" class="pdf-viewer" />
-        <p><a href="{{PDF_PATH}}" target="_blank">PDFを新しいタブで開く</a></p>
-    </div>
+        <div class="card outline">
+            <h2>講義概要（PDF）</h2>
+            <div class="pdf-frame">
+                <embed src="{{PDF_PATH}}" type="application/pdf" />
+            </div>
+            <p style="margin-top:10px;"><a class="link" href="{{PDF_PATH}}" target="_blank">PDFを新しいタブで開く</a></p>
+        </div>
 
-    <div class="sessions">
-        <h2>実施回情報</h2>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>開始日時</th>
-                    <th>終了日時</th>
-                    <th>場所</th>
-                    <th>定員</th>
-                    <th>申し込み人数</th>
-                </tr>
-            </thead>
-            <tbody>
-                {{SESSION_ROWS}}
-            </tbody>
-        </table>
+        <div class="card sessions">
+            <h2>実施回情報</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>開始日時</th>
+                        <th>終了日時</th>
+                        <th>場所</th>
+                        <th>定員</th>
+                        <th>申し込み人数</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{SESSION_ROWS}}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 

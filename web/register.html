@@ -5,6 +5,152 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>アカウント登録</title>
+    <style>
+        /* トップページと同じテーマ */
+        :root {
+            --primary: #007BFF;
+            --primary-dark: #0056b3;
+            --card-bg: #ffffff;
+            --page-bg: #f5f7fb;
+            --radius: 8px;
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--page-bg);
+            margin: 0;
+            padding: 20px;
+            color: #222;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .title-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 1.25em;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            max-width: 980px;
+            margin: 0 auto 20px auto;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 18px 0;
+            font-size: 1.8em;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin: 12px 0 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 18px;
+            align-items: center;
+        }
+
+        .form-grid label {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        .form-grid input[type="text"],
+        .form-grid input[type="email"],
+        .form-grid input[type="password"],
+        .form-grid select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 6px;
+            font-size: 1em;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 26px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.25s, transform 0.12s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn.secondary {
+            background: #6c757d;
+        }
+
+        .note {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* 確認画面の見た目 */
+        #confirmation-screen p {
+            margin: 8px 0;
+            font-size: 1em;
+        }
+
+        #confirmation-screen .confirm-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        @media (max-width: 720px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .title-bar,
+            .card {
+                margin-left: 12px;
+                margin-right: 12px;
+            }
+        }
+    </style>
+
     <script>
         function showConfirmation(event) {
             event.preventDefault();
@@ -17,7 +163,7 @@
             // パスワードのバリデーション
             const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+[\]{};':",.<>?\\|`~\-=/]).{8,}$/;
             if (!passwordRegex.test(password)) {
-                alert('パスワードは8文字以上で、英字、数字、記号(!@#$%^&*()_+[]{};\':",.<>?\\|`~\\-=/)を含む必要があります。');
+                alert('パスワードは8文字以上で、英字、数字、記号(!@#$%^&*()_+[]{};\'":,.<>?\\|`~\\-=/)を含む必要があります。');
                 return;
             }
 
@@ -78,71 +224,84 @@
 </head>
 
 <body>
-    <h1>アカウント登録</h1>
+    <div class="title-bar">S高等専門学校</div>
+    <div class="container">
+        <h1>アカウント登録</h1>
 
-    <!-- 登録フォーム -->
-    <form id="registration-form" onsubmit="showConfirmation(event)">
-        <label>
-            メールアドレス:
-            <input type="email" name="email" required>
-        </label>
-        <br>
-        <label>
-            中学生氏名（姓）:
-            <input type="text" name="student_last_name" required>
-        </label>
-        <label>
-            （名）:
-            <input type="text" name="student_first_name" required>
-        </label>
-        <br>
-        <label>
-            保護者氏名（姓）:
-            <input type="text" name="parent_last_name" required>
-        </label>
-        <label>
-            （名）:
-            <input type="text" name="parent_first_name" required>
-        </label>
-        <br>
-        <label>
-            中学校名:
-            <input type="text" name="junior_high_school" required>
-        </label>
-        <br>
-        <label>
-            学年:
-            <select name="student_grade" required>
-                <option value="1">1年</option>
-                <option value="2">2年</option>
-                <option value="3">3年</option>
-            </select>
-        </label>
-        <br>
-        <label>
-            パスワード:
-            <input type="password" name="password" required>
-        </label>
-        <br>
-        <label>
-            パスワード（確認用）:
-            <input type="password" name="password_confirm" required>
-        </label>
-        <br>
-        <button type="submit">入力内容を確認</button>
-    </form>
+        <div class="card">
+            <!-- 登録フォーム -->
+            <form id="registration-form" onsubmit="showConfirmation(event)">
+                <div class="form-grid">
+                    <label class="full-width">
+                        メールアドレス:
+                        <input type="email" name="email" required>
+                    </label>
 
-    <!-- 確認画面 -->
-    <div id="confirmation-screen" style="display: none;">
-        <h2>入力内容確認</h2>
-        <p>メールアドレス: <span id="confirm-email"></span></p>
-        <p>中学生氏名: <span id="confirm-student-name"></span></p>
-        <p>保護者氏名: <span id="confirm-parent-name"></span></p>
-        <p>中学校名: <span id="confirm-junior-high-school"></span></p>
-        <p>学年: <span id="confirm-student-grade"></span></p>
-        <p>パスワード: <span id="confirm-password"></span></p>
-        <button onclick="goBackToForm()">内容の修正</button>
-        <button onclick="register(event)">この内容でアカウントを登録</button>
+                    <label>
+                        中学生氏名（姓）:
+                        <input type="text" name="student_last_name" required>
+                    </label>
+                    <label>
+                        中学生氏名（名）:
+                        <input type="text" name="student_first_name" required>
+                    </label>
+
+                    <label>
+                        保護者氏名（姓）:
+                        <input type="text" name="parent_last_name" required>
+                    </label>
+                    <label>
+                        保護者氏名（名）:
+                        <input type="text" name="parent_first_name" required>
+                    </label>
+
+                    <label>
+                        中学校名:
+                        <input type="text" name="junior_high_school" required>
+                    </label>
+                    <label>
+                        学年:
+                        <select name="student_grade" required>
+                            <option value="1">1年</option>
+                            <option value="2">2年</option>
+                            <option value="3">3年</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        パスワード:
+                        <input type="password" name="password" required>
+                    </label>
+                    <label>
+                        パスワード（確認用）:
+                        <input type="password" name="password_confirm" required>
+                    </label>
+
+                    <div class="full-width actions">
+                        <button class="btn" type="submit">入力内容を確認</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div id="confirmation-screen" class="card" style="display: none;">
+            <h2 style="text-align:center;">入力内容確認</h2>
+            <div>
+                <p>メールアドレス: <strong id="confirm-email"></strong></p>
+                <p>中学生氏名: <strong id="confirm-student-name"></strong></p>
+                <p>保護者氏名: <strong id="confirm-parent-name"></strong></p>
+                <p>中学校名: <strong id="confirm-junior-high-school"></strong></p>
+                <p>学年: <strong id="confirm-student-grade"></strong></p>
+                <p>パスワード: <strong id="confirm-password"></strong></p>
+            </div>
+
+            <div class="actions" style="margin-top:18px;">
+                <button class="btn secondary" type="button" onclick="goBackToForm()">内容の修正</button>
+                <button class="btn" type="button" onclick="register(event)">この内容でアカウントを登録</button>
+            </div>
+            <p class="note">※ パスワードは8文字以上で英字・数字・記号を含む必要があります。</p>
+        </div>
+
     </div>
 </body>
 

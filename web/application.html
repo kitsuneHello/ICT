@@ -2,9 +2,130 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>抽選申込</title>
+    <style>
+        :root {
+            --primary: #007BFF;
+            --primary-dark: #0056b3;
+            --card-bg: #ffffff;
+            --page-bg: #f5f7fb;
+            --radius: 8px;
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--page-bg);
+            margin: 0;
+            padding: 20px;
+            color: #222;
+        }
+
+        .title-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 1.25em;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            max-width: 980px;
+            margin: 0 auto 18px;
+        }
+
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 8px 0 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        th {
+            background: #f7f9fc;
+            font-weight: 700;
+        }
+
+        .checkbox-cell {
+            width: 56px;
+            text-align: center;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .confirmation {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #fafafa;
+            font-size: 0.95em;
+        }
+
+        .link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 720px) {
+            .container {
+                padding: 0 12px;
+            }
+
+            .checkbox-cell {
+                width: 40px;
+            }
+        }
+    </style>
+
     <script>
         let selectedApplications = [];
 
@@ -13,12 +134,12 @@
             const sessions = await response.json();
             const tableBody = document.querySelector('#session-table tbody');
             tableBody.innerHTML = sessions.map(session => `
-                <tr>
-                    <td><input type="checkbox" value="${session.session_id}" onchange="toggleSelection(this)"></td>
-                    <td>${session.lecture_name}</td>
-                    <td>${session.datetime}</td>
-                </tr>
-            `).join('');
+				<tr>
+					<td class="checkbox-cell"><input type="checkbox" value="${session.session_id}" onchange="toggleSelection(this)"></td>
+					<td>${session.lecture_name}</td>
+					<td>${session.datetime}</td>
+				</tr>
+			`).join('');
         }
 
         function toggleSelection(checkbox) {
@@ -57,24 +178,28 @@
             // 確認内容を表示
             const confirmation = document.querySelector('#confirmation');
             confirmation.innerHTML = `
-                <h3>確認内容</h3>
-                <p>選択した模擬授業:</p>
-                <ul>
-                    ${sessionDetails.map(session => `
-                        <li>${session.lecture_name} (${session.start_datetime} - ${session.end_time})</li>
-                    `).join('')}
-                </ul>
-                <p>申込情報:</p>
-                <ul>
-                    <li>中学生氏名: ${userInfo.student_name}</li>
-                    <li>保護者氏名: ${userInfo.parent_name}</li>
-                    <li>学校名: ${userInfo.junior_high_school}</li>
-                    <li>学年: ${userInfo.student_grade}</li>
-                    <li>結果送信先メールアドレス: ${userInfo.email}</li>
-                </ul>
-                <button onclick="submitApplication()">申し込み</button>
-                <button onclick="modifySelection()">修正</button>
-            `;
+				<div class="confirmation">
+					<h3>確認内容</h3>
+					<p>選択した模擬授業:</p>
+					<ul>
+						${sessionDetails.map(session => `
+							<li>${session.lecture_name} (${session.start_datetime} - ${session.end_time})</li>
+						`).join('')}
+					</ul>
+					<p>申込情報:</p>
+					<ul>
+						<li>中学生氏名: ${userInfo.student_name}</li>
+						<li>保護者氏名: ${userInfo.parent_name}</li>
+						<li>学校名: ${userInfo.junior_high_school}</li>
+						<li>学年: ${userInfo.student_grade}</li>
+						<li>結果送信先メールアドレス: ${userInfo.email}</li>
+					</ul>
+					<div class="actions">
+						<button class="btn" onclick="submitApplication()">申し込み</button>
+						<button class="btn" onclick="modifySelection()">修正</button>
+					</div>
+				</div>
+			`;
         }
 
         function modifySelection() {
@@ -105,19 +230,29 @@
 </head>
 
 <body>
-    <h1>抽選申込</h1>
-    <table id="session-table" border="1">
-        <thead>
-            <tr>
-                <th>選択</th>
-                <th>模擬授業名</th>
-                <th>日時</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <button id="confirm-button" onclick="confirmSelection()">確認</button>
-    <div id="confirmation"></div>
+    <div class="title-bar">S高等専門学校</div>
+    <div class="container">
+        <div class="card">
+            <h1>抽選申込</h1>
+
+            <table id="session-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell">選択</th>
+                        <th>模擬授業名</th>
+                        <th>日時</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <div class="actions" style="margin-top:12px;">
+                <button id="confirm-button" class="btn" onclick="confirmSelection()">確認</button>
+            </div>
+
+            <div id="confirmation"></div>
+        </div>
+    </div>
 </body>
 
 </html>

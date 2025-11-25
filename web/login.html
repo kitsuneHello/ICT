@@ -5,6 +5,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ログイン</title>
+    <style>
+        :root {
+            --primary: #007BFF;
+            --primary-dark: #0056b3;
+            --card-bg: #ffffff;
+            --page-bg: #f5f7fb;
+            --radius: 8px;
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--page-bg);
+            margin: 0;
+            padding: 20px;
+            color: #222;
+        }
+
+        .title-bar {
+            background-color: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 1.25em;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            max-width: 980px;
+            margin: 0 auto 20px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-top: 14px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 12px 0 18px;
+            font-size: 1.6em;
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            font-size: 0.95em;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 6px;
+            font-size: 1em;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+
+        .btn {
+            padding: 12px 26px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            transition: background-color .2s, transform .12s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .link {
+            display: block;
+            text-align: center;
+            margin-top: 12px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        @media (max-width: 520px) {
+            .container {
+                padding: 0 12px;
+            }
+        }
+    </style>
+
     <script>
         async function login(event) {
             event.preventDefault();
@@ -33,21 +144,30 @@
 </head>
 
 <body>
-    <h1>ログイン</h1>
-    <form onsubmit="login(event)">
-        <label>
-            メールアドレス:
-            <input type="email" name="email" required>
-        </label>
-        <br>
-        <label>
-            パスワード:
-            <input type="password" name="password" required>
-        </label>
-        <br>
-        <button type="submit">ログイン</button>
-    </form>
-    <a href="/register.html">アカウントを持っていない方はこちら</a>
+    <div class="title-bar">S高等専門学校</div>
+    <div class="container">
+        <h1>ログイン</h1>
+
+        <div class="card">
+            <form onsubmit="login(event)">
+                <label>
+                    メールアドレス:
+                    <input type="email" name="email" required>
+                </label>
+
+                <label>
+                    パスワード:
+                    <input type="password" name="password" required>
+                </label>
+
+                <div class="actions">
+                    <button class="btn" type="submit">ログイン</button>
+                </div>
+
+                <a class="link" href="/register.html">アカウントを持っていない方はこちら</a>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>
