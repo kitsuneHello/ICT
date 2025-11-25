@@ -178,7 +178,6 @@
             document.querySelector('#confirm-parent-name').textContent = `${formData.get('parent_last_name')} ${formData.get('parent_first_name')}`;
             document.querySelector('#confirm-junior-high-school').textContent = formData.get('junior_high_school');
             document.querySelector('#confirm-student-grade').textContent = `${formData.get('student_grade')}年`;
-            document.querySelector('#confirm-password').textContent = password;
 
             // 確認画面を表示
             document.querySelector('#registration-form').style.display = 'none';
@@ -292,7 +291,6 @@
                 <p>保護者氏名: <strong id="confirm-parent-name"></strong></p>
                 <p>中学校名: <strong id="confirm-junior-high-school"></strong></p>
                 <p>学年: <strong id="confirm-student-grade"></strong></p>
-                <p>パスワード: <strong id="confirm-password"></strong></p>
             </div>
 
             <div class="actions" style="margin-top:18px;">
