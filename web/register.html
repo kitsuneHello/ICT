@@ -219,6 +219,27 @@
             document.querySelector('#confirmation-screen').style.display = 'none';
             document.querySelector('#registration-form').style.display = 'block';
         }
+
+        async function sendVerificationCode() {
+            const email = document.querySelector('#email').value;
+            if (!email) {
+                alert('メールアドレスを入力してください。');
+                return;
+            }
+
+            const response = await fetch('/send-verification-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            if (response.ok) {
+                alert('認証コードを送信しました。メールをご確認ください。');
+            } else {
+                const error = await response.text();
+                alert(`エラー: ${error}`);
+            }
+        }
     </script>
 </head>
 
@@ -233,7 +254,12 @@
                 <div class="form-grid">
                     <label class="full-width">
                         メールアドレス:
-                        <input type="email" name="email" required>
+                        <input type="email" name="email" id="email" required>
+                        <button type="button" class="btn secondary" onclick="sendVerificationCode()">認証コードを送信</button>
+                    </label>
+                    <label class="full-width">
+                        認証コード:
+                        <input type="text" name="verification_code" id="verification_code" required>
                     </label>
 
                     <label>
