@@ -5,8 +5,6 @@ const mysql = require('mysql2');
 const multer = require('multer'); // ファイルアップロード用
 const bcrypt = require('bcrypt'); // bcryptライブラリを追加
 const session = require('express-session'); // セッション管理用
-const crypto = require('crypto'); // 認証コード生成用
-const nodemailer = require('nodemailer'); // メール送信用
 const app = express();
 const PORT = 3000;
 
@@ -369,41 +367,6 @@ app.post('/lecture/create', upload.single('outline_pdf'), async (req, res) => {
     });
 });
 
-// メール送信用設定
-const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: 's2201095@sendai-nct.jp', // 送信元メールアドレス
-        pass: 'Tsunefoxtsune-0416'  // メールアカウントのパスワード
-    }
-});
-
-const verificationCodes = new Map(); // メールアドレスと認証コードを一時保存
-
-// 認証コード送信API
-app.post('/send-verification-code', (req, res) => {
-    const { email } = req.body;
-    if (!email) {
-        return res.status(400).send('メールアドレスを入力してください。');
-    }
-
-    const verificationCode = crypto.randomInt(100000, 999999).toString(); // 6桁の認証コード
-    verificationCodes.set(email, verificationCode);
-
-    // 認証コードをメールで送信
-    transporter.sendMail({
-        from: 's2201095@sendai-nct.jp',
-        to: email,
-        subject: '認証コード',
-        text: `認証コード: ${verificationCode}`
-    }, (err) => {
-        if (err) {
-            console.error('メール送信エラー:', err);
-            return res.status(500).send('認証コードの送信に失敗しました。');
-        }
-        res.status(200).send('認証コードを送信しました。');
-    });
-});
 
 // アカウント登録API
 app.post('/register', async (req, res) => {
@@ -415,15 +378,9 @@ app.post('/register', async (req, res) => {
         parent_last_name,
         junior_high_school,
         student_grade,
-        password,
-        verification_code // 認証コードを追加
+        password
     } = req.body;
 
-    // 認証コードの検証
-    if (verificationCodes.get(email) !== verification_code) {
-        return res.status(400).send('認証コードが正しくありません。');
-    }
-    verificationCodes.delete(email); // 認証コードを削除
 
     // バリデーション
     if (!email || !student_first_name || !student_last_name || !parent_first_name || !parent_last_name ||
