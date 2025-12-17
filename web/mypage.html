@@ -6,109 +6,211 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>マイページ</title>
     <style>
+        :root {
+            --primary: #007BFF;
+            --primary-strong: #0056b3;
+            --danger: #FF4136;
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --radius: 10px;
+            --container-max: 980px;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
+            background: linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
             margin: 0;
             padding: 0;
-        }
-
-        h1 {
-            font-size: 2.5em;
-            margin: 20px 0;
-        }
-
-        h2 {
-            font-size: 1.5em;
-            margin: 20px 0;
-        }
-
-        .info {
-            margin: 20px auto;
-            max-width: 600px;
-            text-align: left;
-            font-size: 1em;
-        }
-
-        .info p {
-            margin: 10px 0;
-        }
-
-        .application-info {
-            margin: 20px auto;
-            max-width: 800px;
-            text-align: center;
-        }
-
-        .application-info table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        .application-info th,
-        .application-info td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .application-info th {
-            background-color: #007BFF;
-            color: white;
-        }
-
-        .application-info td {
-            background-color: #f9f9f9;
-        }
-
-        .application-info button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 1em;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: background-color 0.3s, transform 0.2s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .application-info button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-
-        .logout-button {
-            margin: 20px 0;
-            padding: 10px 20px;
-            background-color: #FF4136;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        .logout-button:hover {
-            background-color: #C0392B;
-            transform: translateY(-2px);
+            color: #111827;
+            -webkit-font-smoothing: antialiased;
         }
 
         .title-bar {
-            background-color: #007BFF;
+            background-color: var(--primary);
             color: white;
-            padding: 10px 20px;
+            padding: 14px 20px;
             text-align: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1.25rem;
+            font-weight: 700;
+            box-shadow: 0 6px 18px rgba(3, 84, 255, 0.12);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .site-container {
+            max-width: var(--container-max);
+            margin: 28px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin: 18px 0 10px;
+            font-size: 1.9rem;
+            text-align: center;
+        }
+
+        /* card */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+            margin-bottom: 20px;
+        }
+
+        /* info grid */
+        .info {
+            font-size: 0.98rem;
+            color: #111827;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            align-items: start;
+        }
+
+        .info-item {
+            background: linear-gradient(180deg, rgba(0, 123, 255, 0.03), transparent);
+            border-radius: 8px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-item .label {
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        .info-item .value {
+            font-weight: 600;
+            font-size: 1.02rem;
+        }
+
+        /* application area */
+        .application-info {
+            text-align: center;
+        }
+
+        .application-card {
+            padding: 14px;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th,
+        td {
+            padding: 12px 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        th {
+            background: linear-gradient(90deg, var(--primary), var(--primary-strong));
+            color: #fff;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) td {
+            background: #fbfdff;
+        }
+
+        tr:hover td {
+            background: rgba(0, 123, 255, 0.04);
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        .pill.pending {
+            background: #6b7280;
+        }
+
+        .pill.win {
+            background: #10b981;
+        }
+
+        .pill.lose {
+            background: #ef4444;
+        }
+
+        .application-info button,
+        .logout-button {
+            display: inline-block;
+            padding: 10px 18px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(3, 102, 255, 0.12);
+            transition: transform .14s ease, box-shadow .14s ease, background-color .14s ease;
+        }
+
+        .application-info button:hover,
+        .logout-button:hover {
+            transform: translateY(-3px);
+            background-color: var(--primary-strong);
+            box-shadow: 0 14px 30px rgba(3, 102, 255, 0.14);
+        }
+
+        .logout-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 12px;
+        }
+
+        .muted-note {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-top: 6px;
+        }
+
+        @media (max-width:560px) {
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .info-item .value {
+                font-size: 0.98rem;
+            }
+
+            .application-info button,
+            .logout-button {
+                width: 90%;
+            }
         }
     </style>
     <script>
@@ -123,6 +225,7 @@
                 document.querySelector('#student-grade').textContent = `${userData.student_grade}年`;
 
                 const applicationInfo = document.querySelector('#application-info');
+                applicationInfo.innerHTML = ''; // 既存内容をクリア
                 if (userData.applications && userData.applications.length > 0) {
                     // 開始日時でソート
                     userData.applications.sort((a, b) => {
@@ -131,22 +234,36 @@
                         return dateA - dateB;
                     });
 
-                    const table = document.createElement('table');
-                    table.innerHTML = `
-                        <tr>
-                            <th>模擬授業名</th>
-                            <th>日時</th>
-                            <th>抽選状況</th>
-                        </tr>
-                        ${userData.applications.map(app => `
-                            <tr>
-                                <td>${app.lecture_name}</td>
-                                <td>${app.datetime}</td>
-                                <td>${app.lottery_result === 'PENDING' ? '抽選前' : app.lottery_result === 'WIN' ? '当選' : '落選'}</td>
-                            </tr>
-                        `).join('')}
+                    const card = document.createElement('div');
+                    card.className = 'card application-card';
+                    card.innerHTML = `
+                        <div class="muted-note">申し込みの一覧（最新順）</div>
+                        <div class="table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>模擬授業名</th>
+                                        <th>日時</th>
+                                        <th>抽選状況</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${userData.applications.map(app => `
+                                        <tr>
+                                            <td>${app.lecture_name}</td>
+                                            <td>${app.datetime}</td>
+                                            <td>
+                                                ${app.lottery_result === 'PENDING' ? '<span class="pill pending">抽選前</span>' :
+                            app.lottery_result === 'WIN' ? '<span class="pill win">当選</span>' :
+                                '<span class="pill lose">落選</span>'}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
                     `;
-                    applicationInfo.appendChild(table);
+                    applicationInfo.appendChild(card);
                 } else {
                     const periodResponse = await fetch('/reception-period');
                     if (periodResponse.ok) {
@@ -155,16 +272,21 @@
                         const start = new Date(periodData.start_datetime);
                         const end = new Date(periodData.end_datetime);
 
+                        const card = document.createElement('div');
+                        card.className = 'card application-card';
                         if (now >= start && now <= end) {
                             const button = document.createElement('button');
                             button.textContent = '申し込みはこちら';
                             button.onclick = () => window.location.href = '/application.html';
-                            applicationInfo.appendChild(button);
+                            card.appendChild(button);
+                            card.appendChild(document.createElement('div')).className = 'muted-note';
                         } else {
                             const message = document.createElement('p');
-                            message.textContent = `模擬授業の申し込みは${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日 ${start.getHours()}時${start.getMinutes()}分開始`;
-                            applicationInfo.appendChild(message);
+                            message.textContent = `模擬授業の申し込みは${start.getFullYear()}年${start.getMonth() + 1}月${start.getDate()}日 ${start.getHours()}時${String(start.getMinutes()).padStart(2, '0')}分開始`;
+                            message.className = 'muted-note';
+                            card.appendChild(message);
                         }
+                        applicationInfo.appendChild(card);
                     } else {
                         alert('受付期間情報の取得に失敗しました。');
                     }
@@ -190,18 +312,42 @@
 </head>
 
 <body>
-    <div class="title-bar">S高等専門学校 オーブンキャンパス</div>
-    <h1>マイページ</h1>
-    <div class="info">
-        <p>メールアドレス: <span id="email"></span></p>
-        <p>中学生氏名: <span id="student-name"></span></p>
-        <p>保護者氏名: <span id="parent-name"></span></p>
-        <p>中学校名: <span id="junior-high-school"></span></p>
-        <p>学年: <span id="student-grade"></span></p>
+    <div class="title-bar">S高等専門学校 オープンキャンパス</div>
+    <div class="site-container">
+        <h1>マイページ</h1>
+
+        <div class="card info">
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="label">メールアドレス</div>
+                    <div id="email" class="value">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">中学生氏名</div>
+                    <div id="student-name" class="value">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">保護者氏名</div>
+                    <div id="parent-name" class="value">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">中学校名</div>
+                    <div id="junior-high-school" class="value">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">学年</div>
+                    <div id="student-grade" class="value">-</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="text-align:center; margin-top:6px;">あなたの申し込み</h2>
+        <div id="application-info" class="application-info"></div>
+
+        <div class="logout-row">
+            <button class="logout-button" onclick="logout()">ログアウト</button>
+        </div>
     </div>
-    <h2>あなたの申し込み</h2>
-    <div id="application-info" class="application-info"></div>
-    <button class="logout-button" onclick="logout()">ログアウト</button>
 </body>
 
 </html>
