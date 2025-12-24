@@ -43,8 +43,8 @@ app.use(session({
     cookie: { secure: false } // HTTPSを使用する場合はtrueに設定
 }));
 
-// is_activeチェック用ミドルウェア
-//is_activeは中学生向けのサイトを公開するかどうか
+
+//登録されている模擬授業がない場合は、中学生側からはシステムの利用ができない
 const checkSystemActive = (req, res, next) => {
     connection.query(
         'SELECT COUNT(*) AS count FROM Reception_Period',
