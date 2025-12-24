@@ -184,7 +184,6 @@ app.get('/lecture', (req, res) => {
                     let modifiedHtml = htmlContent.replace('{{LECTURE_NAME}}', lecture.lecture_name || '');
                     // outline_pdf_path は DB のパスをそのまま使う（静的配信される前提）
                     const pdfPath = lecture.outline_pdf_path || '';
-                    console.log('PDFパス:', pdfPath);
                     modifiedHtml = modifiedHtml.replaceAll('{{PDF_PATH}}', pdfPath);
 
                     // 実施回情報を生成
